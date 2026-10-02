@@ -1,0 +1,132 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cool Melbourne — walking access</title><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/><style>
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+:root{--forest:#173f3b;--teal:#27776c;--sage:#dceae3;--cream:#f7f8f4;--line:#e1e9e4;--ink:#1d3936;--muted:#667a74}
+*{box-sizing:border-box}
+body{margin:0;font:14px 'DM Sans',Arial,sans-serif;color:var(--ink);background:var(--cream)}
+header{background:var(--forest);color:#fff;padding:19px 30px;display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:98px}
+header h1{font:800 29px Manrope,Arial,sans-serif;letter-spacing:-1.2px;margin:3px 0}
+header small{color:#d0e2db;font-size:12px;letter-spacing:.1px}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:2px;color:#b5d5ca}
+.header-chip{border:1px solid #668f82;border-radius:99px;padding:9px 13px;font-size:11px;color:#d6ebe2;white-space:nowrap}
+.layout{display:grid;grid-template-columns:minmax(325px,380px) minmax(0,1fr);height:calc(100vh - 98px)}
+aside{background:#f9faf7;padding:25px 23px;overflow:auto;border-right:1px solid var(--line)}
+#map{height:100%;min-height:500px;background:#e6ece7}
+.section-title{font:800 11px Manrope,Arial,sans-serif;letter-spacing:1.4px;color:var(--teal);text-transform:uppercase;margin:24px 0 12px}
+.intro{color:var(--muted);line-height:1.5;margin:3px 0 18px}
+.panel{background:white;border:1px solid var(--line);border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 4px 20px #143b3010}
+label{display:block;margin:11px 0 6px;font-weight:700;font-size:12px}
+input:not([type=checkbox]){width:100%;border:1px solid #d5e2db;background:#fff;border-radius:10px;padding:12px;font:inherit;outline:none}
+input:focus{border-color:var(--teal);box-shadow:0 0 0 3px #27776c19}
+input[type=checkbox]{accent-color:var(--teal);margin-right:8px}
+button{font:700 12px 'DM Sans',Arial,sans-serif;background:var(--teal);color:white;border:0;border-radius:10px;padding:12px 14px;cursor:pointer;margin-top:9px;transition:filter .15s}
+button:hover:not(:disabled){filter:brightness(.91)}
+button:disabled{opacity:.5;cursor:default}
+.secondary{background:#e8f0eb;color:var(--forest)}
+#calculate{display:block;width:100%;background:var(--forest);padding:15px;margin-top:17px;font-size:13px}
+.controls{display:flex;gap:8px}.controls button{flex:1}
+.small{font-size:11px;color:var(--muted);line-height:1.55}
+.facility{background:white;border:1px solid var(--line);padding:15px;border-radius:13px;margin:10px 0;box-shadow:0 3px 12px #173f3b08;line-height:1.6}
+.facility b{font:800 13px Manrope,Arial,sans-serif}
+.facility button{font-size:11px;padding:9px 12px;background:#e7f1eb;color:var(--forest)}
+.hint{padding:13px;background:#e7f1eb;border:1px solid #d3e7d9;border-radius:11px;margin:15px 0;font-size:12px;line-height:1.55}
+h3{font:800 15px Manrope,Arial,sans-serif;letter-spacing:-.35px;margin:25px 0 10px}
+#count{color:var(--teal)}
+#directions{line-height:1.7}#directions li{margin-bottom:8px}
+.category-row{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;background:#f7f9f6;border-radius:10px;margin:7px 0}
+.category-row label{margin:0;cursor:pointer}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.disclaimer{border-top:1px solid var(--line);padding-top:15px;margin-top:25px}
+.leaflet-container{font-family:'DM Sans',Arial,sans-serif}
+@media(max-width:700px){header{padding:16px 19px;min-height:85px}header h1{font-size:23px}.header-chip{display:none}.layout{display:flex;flex-direction:column;height:auto}aside{padding:19px;order:1}#map{height:50vh;min-height:330px;order:0}}
+
+
+/* Distinctive editorial dashboard layer */
+body{background:#f2f3ec;color:#203c36}
+header{height:206px;min-height:206px;padding:28px 45px;background:#183d37;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between}
+header:after{content:"";position:absolute;right:130px;top:-110px;width:360px;height:360px;border:1px solid #ffffff25;border-radius:50%;box-shadow:0 0 0 48px #ffffff07,0 0 0 96px #ffffff05;pointer-events:none}
+.brand{z-index:1}.eyebrow{font-size:10px;letter-spacing:2.4px;color:#a9cabc;font-weight:800}
+header h1{font:800 clamp(30px,3.2vw,47px)/1.07 Manrope,Arial,sans-serif;letter-spacing:-2px;margin:10px 0 10px}
+header h1 em{color:#bbddae;font-style:normal}.hero-desc{max-width:480px;font-size:12px;line-height:1.6;color:#d0dfd6;margin:0}
+.hero-side{z-index:1;display:flex;flex-direction:column;align-items:center;border-left:1px solid #ffffff45;padding-left:35px;margin-right:35px;color:#d8eddb}
+.hero-number{font:800 69px/1 Manrope,Arial,sans-serif;letter-spacing:-5px}.hero-number span{font-size:16px;letter-spacing:0;margin-left:3px}
+.hero-caption{text-align:center;font-size:10px;letter-spacing:1.7px;line-height:1.6;margin-top:9px}
+.layout{grid-template-columns:minmax(335px,390px) minmax(0,1fr);height:calc(100vh - 206px)}
+aside{padding:25px;background:#f6f7f1}.sidebar-top{display:flex;align-items:center;gap:8px;color:#316a59;font-size:10px;font-weight:800;letter-spacing:1.2px}
+.sidebar-index{margin-left:auto;color:#8d9e96}.live-dot{display:inline-block;background:#85b78c;border-radius:50%;width:7px;height:7px;box-shadow:0 0 0 3px #85b78c25}
+.intro{font-size:13px;line-height:1.65;margin:17px 0 24px;color:#64766c}
+.section-title{letter-spacing:1.6px;font-size:10px;color:#356c5d;margin:23px 0 9px}
+.panel{border:1px solid #e2e8de;border-radius:4px;box-shadow:none;padding:17px 17px 19px;background:#fff}
+input:not([type=checkbox]){border-radius:4px;background:#fbfcfa;padding:13px}
+button{border-radius:4px}#calculate{border-radius:4px;background:#183d37;font-size:13px;letter-spacing:.2px}
+.category-row{border-radius:4px;background:#f6f8f4}.hint{border-radius:4px;background:#e9f1e8;border-color:#d9e6d6}
+.facility{border-radius:5px;border-left:3px solid #72a48d;box-shadow:none;padding:16px 15px}
+.facility button{border-radius:3px}
+.map-shell{position:relative;min-height:0;overflow:hidden}#map{height:100%;min-height:100%;width:100%}
+.map-badge{position:absolute;z-index:500;top:18px;left:18px;background:#fff;padding:12px 16px;box-shadow:0 4px 22px #183d371e;color:#31594e;font-size:10px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:9px}
+.map-legend{position:absolute;z-index:500;right:18px;bottom:26px;background:#fff;padding:16px 19px;min-width:165px;box-shadow:0 4px 24px #183d3722;display:flex;flex-direction:column;gap:10px;font-size:11px;color:#52645c}
+.map-legend strong{font-size:10px;letter-spacing:1.4px;color:#1c4438;margin-bottom:3px}.map-legend span{display:flex;align-items:center;gap:10px}
+.legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%}.legend-line{display:inline-block;width:20px;height:5px;background:#66b8a4;border-radius:2px}
+@media(max-width:700px){header{height:auto;min-height:170px;padding:23px 20px}.hero-side{display:none}.layout{height:auto;display:flex;flex-direction:column}.map-shell{height:48vh;min-height:340px;order:0}#map{height:100%;min-height:100%}aside{order:1}.map-badge{top:12px;left:12px;font-size:9px}.map-legend{bottom:14px;right:12px;padding:10px;gap:6px;font-size:10px}}
+
+/* COOL MELBOURNE — BLUE EDITION */
+:root{--forest:#102e49;--teal:#216ba5;--sage:#dcebf7;--cream:#f3f8fc;--line:#dce7f0;--ink:#16334c;--muted:#627c91}
+body{background:#f0f6fb;color:var(--ink)}
+header{background:linear-gradient(115deg,#102e49 0%,#174f78 72%,#236b9a 100%)}
+header:after{border-color:#ffffff28}
+header h1 em{color:#a8dcfa}
+.eyebrow,.hero-side{color:#b8def7}
+.hero-desc{color:#d9eaf6}
+aside{background:#f3f8fc;border-right:1px solid #dbe7f0}
+.sidebar-top,.section-title{color:#236d9c}
+.live-dot{background:#72b7df;box-shadow:0 0 0 3px #72b7df35}
+.panel{border-color:#dae6f0}
+input:not([type=checkbox]){background:#fbfdff;border-color:#d4e3ee}
+input:focus{border-color:#3384bb;box-shadow:0 0 0 3px #3384bb22}
+input[type=checkbox]{accent-color:#247cb2}
+button{background:#2679ae}
+.secondary{background:#e8f2f9;color:#194d73}
+#calculate{background:#145481}
+.category-row{background:#f1f7fc}
+.hint{background:#e8f4fc;border-color:#cfe5f5;color:#245577}
+.facility{border-color:#dbe7f0;border-left-color:#3a92c2}
+.facility button{background:#e6f2fa;color:#17577d}
+.map-badge{color:#245a80}
+.map-legend strong{color:#163f60}
+#count{color:#247cb2}
+.sym-icon{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;border:2px solid white;box-shadow:0 2px 10px #123e6260}
+.sym-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sym-indoor{background:#246da8}.sym-outdoor{background:#2b9c9a}.sym-start{background:transparent;border:0;box-shadow:none;border-radius:0;padding:0}.sym-start svg{width:32px;height:42px;display:block;stroke:none;fill:none}.map-legend .sym-start{background:transparent;border:0;box-shadow:none;width:23px;height:30px}.map-legend .sym-start svg{width:23px;height:30px}
+.legend-symbol{display:inline-grid;place-items:center;width:23px;height:23px;border-radius:50%;color:white;flex:none}
+.legend-symbol svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.map-legend span{gap:9px}
+.map-legend .route-swatch{
+  display:inline-block;flex:none;width:25px;height:6px;border-radius:10px;
+  background:#ee854b;border:1.5px solid white;
+  box-shadow:0 0 0 1px #e7b097;
+}
+</style></head><body><header><div class="brand"><div class="eyebrow">COOL MELBOURNE / URBAN HEAT ACCESS</div><h1>Explore your<br><em>cooling options.</em></h1><p class="hero-desc">Find potential indoor and outdoor cooling resources within a 10-minute walk of your chosen location.</p></div><div class="hero-side"><span class="hero-number">10<span>MIN</span></span><span class="hero-caption">WALKING ACCESS<br>EXPLORER</span></div></header><div class="layout"><aside><div class="sidebar-top"><span class="live-dot"></span> INTERACTIVE EXPLORER <span class="sidebar-index">01 / 03</span></div><p class="intro">Choose a starting point, select your resources and discover what you can reach on foot.</p><div class="panel"><div class="section-title" style="margin-top:0">Local testing</div><label for="key">Your openrouteservice API key (for local testing)</label><input id="key" type="password" placeholder="Paste your key here"><p class="small">Key stays in this page's memory. Do not publish an unrestricted key in public website code.</p></div><div class="section-title">01 / Choose your location</div><div class="panel"><label for="address">Your starting location</label><input id="address" placeholder="e.g. Richmond Station, Melbourne"><div class="controls"><button id="search">Search address</button><button class="secondary" id="gps">Use my location</button></div><p class="small">Or click anywhere on the map to set your starting point.</p></div><div class="section-title">02 / Explore cooling access</div><div class="panel"><label style="margin-top:0">Facility categories</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="indoor" checked> Indoor facilities</label><span>▣</span></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="outdoor" checked> Outdoor resources</label><span>♧</span></div><button id="calculate">Find facilities within 10 minutes</button><div id="status" class="hint">Select a starting location to begin.</div></div><div class="section-title">03 / Your results</div><h3>Reachable facilities <span id="count"></span></h3><div id="results"></div><h3>Walking directions</h3><div id="directions" class="small">Choose a reachable facility and select Get directions.</div><p class="small disclaimer">Prototype only. Opening hours, public access, entrances and cooling suitability require verification. Routing depends on OpenStreetMap coverage.</p></aside><div class="map-shell"><div id="map"></div><div class="map-badge"><span class="live-dot"></span> MELBOURNE · WALKING NETWORK</div><div class="map-legend"><strong>MAP KEY</strong><span><i class="legend-symbol sym-indoor"><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg></i>Indoor facilities</span><span><i class="legend-symbol sym-outdoor"><svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg></i>Outdoor resources</span><span><i class="legend-symbol sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></i>Starting location</span><span><i class="legend-dot" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute area</span><span><i class="route-swatch"></i>Walking route</span></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script>
+const icons={
+ indoor:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg>',
+ outdoor:'<svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg>'
+};
+function symbol(group){return L.divIcon({className:'',html:'<div class="sym-icon sym-'+group+'">'+icons[group]+'</div>',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-18]})}
+const map=L.map('map').setView([-37.8136,144.9631],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);
+const status=document.getElementById('status'),results=document.getElementById('results'),directions=document.getElementById('directions');let start=null,startMarker=null,iso=null,route=null,features=[],markers=L.layerGroup().addTo(map),reachable=[];
+function message(s){status.textContent=s}function safe(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setStart(lat,lng){start=[lng,lat];if(startMarker)map.removeLayer(startMarker);startMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></div>',iconSize:[32,42],iconAnchor:[16,39],popupAnchor:[0,-38]})}).addTo(map).bindPopup('Starting location').openPopup();map.setView([lat,lng],14);message('Location selected. Click Find facilities within 10 minutes.');if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);markers.clearLayers();results.innerHTML='';directions.textContent='Choose a reachable facility.'}
+map.on('click',e=>setStart(e.latlng.lat,e.latlng.lng));document.getElementById('gps').onclick=()=>{if(!navigator.geolocation)return message('Geolocation unavailable. Search an address instead.');message('Finding your location…');navigator.geolocation.getCurrentPosition(p=>setStart(p.coords.latitude,p.coords.longitude),e=>message('Location unavailable: '+e.message),{enableHighAccuracy:true,timeout:12000})};
+document.getElementById('search').onclick=async()=>{let q=document.getElementById('address').value.trim();if(!q)return message('Enter an address first.');message('Searching address…');try{let r=await fetch('https://photon.komoot.io/api/?limit=1&q='+encodeURIComponent(q));if(!r.ok)throw Error('Address search unavailable');let d=await r.json();if(!d.features.length)throw Error('Address not found; try adding Melbourne, VIC');let [lng,lat]=d.features[0].geometry.coordinates;setStart(lat,lng)}catch(e){message(e.message)}};
+async function ors(endpoint,payload){let key=document.getElementById('key').value.trim();if(!key)throw Error('Paste your openrouteservice API key first.');let r=await fetch('https://api.openrouteservice.org/v2/'+endpoint,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/json, application/geo+json'},body:JSON.stringify(payload)});if(!r.ok){let body=await r.text();throw Error('Routing service error '+r.status+': '+body.slice(0,160))}return r.json()}
+function selected(f){return document.getElementById(f.properties.group).checked}function showMarkers(items){markers.clearLayers();for(let f of items){let [lng,lat]=f.geometry.coordinates,p=f.properties;L.marker([lat,lng],{icon:symbol(p.group==='indoor'?'indoor':'outdoor')}).addTo(markers).bindPopup('<b>'+safe(p.name)+'</b><br>'+safe(p.category))}}
+async function load(){try{let [a,b]=await Promise.all(['indoor','outdoor'].map(x=>fetch('cooling_'+x+'.geojson').then(r=>{if(!r.ok)throw Error('Missing GeoJSON file');return r.json()})));features=[...a.features,...b.features].filter(f=>f.geometry?.type==='Point');message(features.length+' facilities loaded. Select your location.');}catch(e){message('Could not load facility data: '+e.message+'. Run using a local web server, not file://.')}}load();
+document.getElementById('calculate').onclick=async()=>{if(!start)return message('Choose your location first.');message('Calculating 10-minute walking catchment…');results.innerHTML='';directions.textContent='Choose a reachable facility.';try{let d=await ors('isochrones/foot-walking',{locations:[start],range:[600],range_type:'time'});if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);iso=L.geoJSON(d,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.27}}).addTo(map);let poly=d.features[0];reachable=features.filter(f=>selected(f)&&turf.booleanPointInPolygon(f,poly)).map(f=>({f,straight:turf.distance(turf.point(start),f,{units:'kilometers'})})).sort((a,b)=>a.straight-b.straight);showMarkers(reachable.map(x=>x.f));document.getElementById('count').textContent='('+reachable.length+')';message('Catchment calculated. Listed facilities fall within the approximate 10-minute walking area. Select one for an actual route and travel time.');map.fitBounds(iso.getBounds(),{padding:[18,18]});renderResults()}catch(e){message(e.message)}};
+function renderResults(){results.innerHTML='';if(!reachable.length){results.textContent='No facilities found for these categories in this catchment.';return}for(let [i,obj] of reachable.slice(0,80).entries()){let p=obj.f.properties;let el=document.createElement('div');el.className='facility';el.innerHTML='<b>'+safe(p.name)+'</b><br><span class="small">'+safe(p.category)+' · '+safe(p.group)+'<br>'+safe(p.hours?'Hours (unverified): '+p.hours:'Hours not verified')+'</span><br><button>Get walking directions</button>';el.querySelector('button').onclick=()=>getRoute(obj.f);results.append(el)}if(reachable.length>80){let el=document.createElement('p');el.className='small';el.textContent='Showing first 80 by straight-line distance. Zoom/map markers show all matches.';results.append(el)}}
+async function getRoute(f){message('Calculating walking route…');try{let d=await ors('directions/foot-walking/geojson',{coordinates:[start,f.geometry.coordinates],instructions:true});if(route)map.removeLayer(route);route=L.featureGroup([
+  L.geoJSON(d,{style:{color:'#ffffff',weight:11,opacity:.96,lineCap:'round',lineJoin:'round',interactive:false}}),
+  L.geoJSON(d,{style:{color:'#ee854b',weight:6,opacity:1,lineCap:'round',lineJoin:'round'}}),
+  L.circleMarker([f.geometry.coordinates[1],f.geometry.coordinates[0]],{
+    radius:7,color:'#ffffff',weight:3,fillColor:'#ee854b',fillOpacity:1
+  })
+]).addTo(map);map.fitBounds(route.getBounds(),{padding:[35,35]});let s=d.features[0].properties.summary;let mins=(s.duration/60).toFixed(1),km=(s.distance/1000).toFixed(2);let steps=d.features[0].properties.segments?.[0]?.steps||[];directions.innerHTML='<b>'+safe(f.properties.name)+'</b><br>'+mins+' min · '+km+' km<ol>'+steps.map(x=>'<li>'+safe(x.instruction)+'</li>').join('')+'</ol>';message(s.duration<=600?'Route verified: within 10 minutes.':'Route is longer than 10 minutes. Isochrone inclusion is approximate; check facility entrance position.')}catch(e){message(e.message)}};
+</script></body></html>
