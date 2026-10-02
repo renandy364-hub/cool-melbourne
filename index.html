@@ -355,6 +355,22 @@ function hoursInfo(f){
     const windows=parsed.periods[day];
     return {open:windows.some(([a,b])=>minute>=a&&minute<b),today:parsed.always?'24/7 (dataset)':windows.length?windows.map(([a,b])=>fmt(a)+'–'+fmt(b)).join(', '):'Closed today',source:p.website||p.contact_we||null,kind:'dataset'};
   }
+  // Project access assumptions, not independently verified schedules.
+  const amenity=String(p.amenity||'').toLowerCase();
+  const layer=String(p.layer||'').toLowerCase();
+  const access=String(p.access||'').toLowerCase();
+  const restricted=['private','customers','no','permit'].includes(access);
+  const tap=amenity==='drinking_water'||layer.includes('drinking fountain');
+  if(tap&&!restricted){return {open:true,today:'Assumed 24/7 access',source:null,kind:'assumption'};}
+  // Only assume all-day access for standalone outdoor public toilets with no
+  // building, indoor or restricted-access indicators. Others stay unknown.
+  const toilet=['toilet','toilets'].includes(amenity)||layer.includes('public toilet');
+  const indoor=String(p.indoor||'').toLowerCase()==='yes';
+  const building=String(p.building||'').toLowerCase();
+  const level=p.level!=null&&String(p.level).trim()!=='';
+  if(toilet&&!restricted&&!indoor&&!building&&!level){
+    return {open:true,today:'Assumed 24/7 (standalone outdoor toilet)',source:null,kind:'assumption'};
+  }
   // Fallback only for the manually entered published schedules.
   const entry=p.group==='indoor'?VERIFIED_HOURS[key]:null;
   if(entry){const [from,to]=entry.schedule[day];return {open:minute>=from&&minute<to,today:fmt(from)+'–'+fmt(to),source:entry.source,kind:'published'};}
@@ -373,7 +389,7 @@ function renderResults(){
     const info=document.createElement('div');
     if(h){
       const pill=document.createElement('span');pill.className='hours-pill '+(h.open?'open':'closed');
-      pill.textContent=(h.open?'Open now':'Closed now')+' · Today '+h.today+' ('+(h.kind==='dataset'?'dataset schedule':'published schedule')+')';
+      pill.textContent=h.kind==='assumption'?'Assumed open · '+h.today:(h.open?'Open now':'Closed now')+' · Today '+h.today+' ('+(h.kind==='dataset'?'dataset schedule':'published schedule')+')';
       const source=document.createElement('a');source.className='hours-source';source.href=h.source;source.target='_blank';source.rel='noopener noreferrer';source.textContent='Check official hours and exceptions ↗';
       info.append(pill);if(h.source)info.append(document.createElement('br'),source);
     }else{info.className='small';info.textContent='Unknown hours';}
