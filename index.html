@@ -121,7 +121,7 @@ button{background:#2679ae}
 .live-gps{width:17px;height:17px;background:#177bdb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px #177bdb66,0 2px 8px #102e4980}
 @media(max-width:700px){.nav-panel{bottom:8px;left:8px;width:calc(100% - 16px);padding:11px}.map-legend{bottom:180px;right:8px;max-width:145px}}
 .hours-pill{display:inline-block;margin:7px 0;padding:5px 8px;border-radius:4px;font-size:11px;font-weight:700;background:#e8f2f9;color:#245577}.hours-pill.open{background:#e2f4e9;color:#246642}.hours-pill.closed{background:#fbece8;color:#a34534}.hours-source{display:inline-block;margin-top:5px;font-size:11px;color:#216ba5}
-</style></head><body><header><div class="brand"><div class="eyebrow">COOL MELBOURNE / URBAN HEAT ACCESS</div><h1>Explore your<br><em>cooling options.</em></h1><p class="hero-desc">Find potential indoor and outdoor cooling resources within a 10-minute walk of your chosen location.</p></div><div class="hero-side"><span class="hero-number">10<span>MIN</span></span><span class="hero-caption">WALKING ACCESS<br>EXPLORER</span></div></header><div class="layout"><aside><div class="sidebar-top"><span class="live-dot"></span> INTERACTIVE EXPLORER <span class="sidebar-index">01 / 03</span></div><p class="intro">Choose a starting point, select your resources and discover what you can reach on foot.</p><div class="section-title">01 / Choose your location</div><div class="panel"><label for="address">Your starting location</label><input id="address" placeholder="e.g. Richmond Station, Melbourne"><div class="controls"><button id="search">Search address</button><button class="secondary" id="gps">Use my location</button></div><p class="small">Or click anywhere on the map to set your starting point.</p></div><div class="section-title">02 / Explore cooling access</div><div class="panel"><label style="margin-top:0">Facility categories</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="indoor" checked> Indoor facilities</label><span>▣</span></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="outdoor" checked> Outdoor resources</label><span>♧</span></div><label style="margin-top:15px">Opening-hours status</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showopen" checked> 🟢 Open now</label></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showclosed" checked> 🔴 Closed now</label></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showunknown" checked> ⚪ Unknown hours</label></div><p class="small">Open/closed statuses are estimates based on the limited published schedules currently included. Unknown means no verified schedule is available, not necessarily closed. Public holidays and temporary closures may differ.</p><button id="calculate">Find facilities within 10 minutes</button><div id="status" class="hint">Select a starting location to begin.</div></div><div class="section-title">03 / Your results</div><h3>Reachable facilities <span id="count"></span></h3><div id="results"></div><h3>Walking directions</h3><div id="directions" class="small">Choose a reachable facility and select Get directions.</div><p class="small disclaimer">Prototype only. Opening hours, public access, entrances and cooling suitability require verification. Routing depends on OpenStreetMap coverage.</p></aside><div class="map-shell"><div id="map"></div><div id="live-nav" class="nav-panel" role="status" aria-live="polite"><h3>WALKING NAVIGATION</h3><div id="nav-instruction" class="nav-main">Preparing your route…</div><div id="nav-distance" class="nav-sub"></div><div id="nav-warning" class="small"></div><button id="nav-recenter" class="secondary">Centre on me</button><button id="nav-stop" class="stop">Stop navigation</button></div><div class="map-badge"><span class="live-dot"></span> MELBOURNE · WALKING NETWORK</div><div class="map-legend"><strong>MAP KEY</strong><span><i class="legend-symbol sym-indoor"><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg></i>Indoor facilities</span><span><i class="legend-symbol sym-outdoor"><svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg></i>Outdoor resources</span><span><i class="legend-symbol sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></i>Starting location</span><span><i class="legend-dot" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute area</span><span><i class="route-swatch"></i>Walking route</span></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script>
+</style></head><body><header><div class="brand"><div class="eyebrow">COOL MELBOURNE / URBAN HEAT ACCESS</div><h1>Explore your<br><em>cooling options.</em></h1><p class="hero-desc">Find potential indoor and outdoor cooling resources within a 10-minute walk of your chosen location.</p></div><div class="hero-side"><span class="hero-number">10<span>MIN</span></span><span class="hero-caption">WALKING ACCESS<br>EXPLORER</span></div></header><div class="layout"><aside><div class="sidebar-top"><span class="live-dot"></span> INTERACTIVE EXPLORER <span class="sidebar-index">01 / 03</span></div><p class="intro">Choose a starting point, select your resources and discover what you can reach on foot.</p><div class="section-title">01 / Choose your location</div><div class="panel"><label for="address">Your starting location</label><input id="address" placeholder="e.g. Richmond Station, Melbourne"><div class="controls"><button id="search">Search address</button><button class="secondary" id="gps">Use my location</button></div><p class="small">Or click anywhere on the map to set your starting point.</p></div><div class="section-title">02 / Explore cooling access</div><div class="panel"><label style="margin-top:0">Facility categories</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="indoor" checked> Indoor facilities</label><span>▣</span></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="outdoor" checked> Outdoor resources</label><span>♧</span></div><label style="margin-top:15px">Opening-hours status</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showopen" checked> 🟢 Open now</label></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showclosed" checked> 🔴 Closed now</label></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="showunknown" checked> ⚪ Unknown hours</label></div><p class="small">Open/closed uses available dataset schedules and selected published schedules. Unknown means no usable schedule is recorded. Public holidays and temporary closures may differ. Public holidays and temporary closures may differ.</p><button id="calculate">Find facilities within 10 minutes</button><div id="status" class="hint">Select a starting location to begin.</div></div><div class="section-title">03 / Your results</div><h3>Reachable facilities <span id="count"></span></h3><div id="results"></div><h3>Walking directions</h3><div id="directions" class="small">Choose a reachable facility and select Get directions.</div><p class="small disclaimer">Prototype only. Opening hours, public access, entrances and cooling suitability require verification. Routing depends on OpenStreetMap coverage.</p></aside><div class="map-shell"><div id="map"></div><div id="live-nav" class="nav-panel" role="status" aria-live="polite"><h3>WALKING NAVIGATION</h3><div id="nav-instruction" class="nav-main">Preparing your route…</div><div id="nav-distance" class="nav-sub"></div><div id="nav-warning" class="small"></div><button id="nav-recenter" class="secondary">Centre on me</button><button id="nav-stop" class="stop">Stop navigation</button></div><div class="map-badge"><span class="live-dot"></span> MELBOURNE · WALKING NETWORK</div><div class="map-legend"><strong>MAP KEY</strong><span><i class="legend-symbol sym-indoor"><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg></i>Indoor facilities</span><span><i class="legend-symbol sym-outdoor"><svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg></i>Outdoor resources</span><span><i class="legend-symbol sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></i>Starting location</span><span><i class="legend-dot" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute area</span><span><i class="route-swatch"></i>Walking route</span></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script>
 const icons={
  indoor:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg>',
  outdoor:'<svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg>'
@@ -290,7 +290,7 @@ function showMarkers(items){
     const h=hoursInfo(f),hours=document.createElement('div');
     hours.textContent=h?(h.open?'Open now (regular hours) · ':'Closed now (regular hours) · ')+h.today:'Unknown hours';
     popup.append(hours);
-    if(h){const link=document.createElement('a');link.href=h.source;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Official opening hours ↗';popup.append(link,document.createElement('br'));}
+    if(h?.source){const link=document.createElement('a');link.href=h.source;link.target='_blank';link.rel='noopener noreferrer';link.textContent='Official opening hours ↗';popup.append(link,document.createElement('br'));}
 
     let btn=document.createElement('button');btn.className='popup-route';btn.textContent='View walking route';
     btn.onclick=()=>{marker.closePopup();getRoute(f)};
@@ -311,13 +311,54 @@ function melbourneNow(){
   const get=t=>parts.find(p=>p.type===t)?.value;
   return {day:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(get('weekday')),minute:Number(get('hour'))*60+Number(get('minute'))};
 }
+function parseDatasetHours(raw){
+  if(!raw)return null;
+  const val=String(raw).trim();
+  if(/^(24\s*\/\s*7|24 hours)$/i.test(val))return {always:true,periods:Array.from({length:7},()=>[[0,1440]])};
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  const periods=Array.from({length:7},()=>[]);
+  // Supports standard OSM day lists, ranges and time ranges. Unhandled rules remain unknown.
+  const segments=val.replace(/,\s+(?=(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:[-,\s]|$))/g,'; ').split(';').map(x=>x.trim()).filter(Boolean);
+  if(segments.some(x=>/\b(PH|SH|sunrise|sunset|week|open|unknown)\b/i.test(x)&&!/^PH off$/i.test(x)))return null;
+  for(const seg of segments){
+    if(/^PH off$/i.test(seg))continue; // Holiday exceptions are not evaluated.
+    const match=seg.match(/^((?:(?:Mo|Tu|We|Th|Fr|Sa|Su)(?:\s*[-,]\s*|\s+))+)\s*(off|closed|(?:\d{1,2}:\d{2}-\d{1,2}:\d{2})(?:\s*,\s*\d{1,2}:\d{2}-\d{1,2}:\d{2})*)$/i);
+    if(!match)return null;
+    const daySpec=match[1].trim();const chosen=new Set();
+    for(const item of daySpec.split(/\s*,\s*/)){
+      const d=item.trim().match(/^(Mo|Tu|We|Th|Fr|Sa|Su)(?:\s*-\s*(Mo|Tu|We|Th|Fr|Sa|Su))?$/i);
+      if(!d)return null;
+      let start=days.findIndex(x=>x.toLowerCase()===d[1].toLowerCase());
+      let end=d[2]?days.findIndex(x=>x.toLowerCase()===d[2].toLowerCase()):start;
+      for(let j=0;j<7;j++){chosen.add(start);if(start===end)break;start=(start+1)%7;}
+    }
+    if(/^(off|closed)$/i.test(match[2]))continue;
+    const windows=match[2].split(/\s*,\s*/).map(x=>x.match(/^(\d{1,2}):(\d{2})-(\d{1,2}):(\d{2})$/));
+    if(windows.some(x=>!x))return null;
+    for(const d of chosen)for(const m of windows){
+      const from=+m[1]*60 + +m[2],to=+m[3]*60 + +m[4];
+      if(from>=1440||to>1440)return null;
+      if(to>from)periods[d].push([from,to]);
+      else if(to<from){periods[d].push([from,1440]);periods[(d+1)%7].push([0,to]);}
+      else return null;
+    }
+  }
+  return {periods};
+}
 function hoursInfo(f){
-  const key=String(f.properties.name||'').trim().toLowerCase();
-  const entry=f.properties.group==='indoor'?VERIFIED_HOURS[key]:null;
-  if(!entry)return null;
-  const {day,minute}=melbourneNow(),[from,to]=entry.schedule[day];
+  const p=f.properties,key=String(p.name||'').trim().toLowerCase();
+  const {day,minute}=melbourneNow();
   const fmt=n=>new Date(Date.UTC(2020,0,1,Math.floor(n/60),n%60)).toLocaleTimeString('en-AU',{timeZone:'UTC',hour:'numeric',minute:'2-digit'});
-  return {open:minute>=from&&minute<to,today:fmt(from)+'–'+fmt(to),closing:to,source:entry.source};
+  const raw=String(p.opening_ho||p.opening_hours||p.hours||'').trim();
+  const parsed=parseDatasetHours(raw);
+  if(parsed){
+    const windows=parsed.periods[day];
+    return {open:windows.some(([a,b])=>minute>=a&&minute<b),today:parsed.always?'24/7 (dataset)':windows.length?windows.map(([a,b])=>fmt(a)+'–'+fmt(b)).join(', '):'Closed today',source:p.website||p.contact_we||null,kind:'dataset'};
+  }
+  // Fallback only for the manually entered published schedules.
+  const entry=p.group==='indoor'?VERIFIED_HOURS[key]:null;
+  if(entry){const [from,to]=entry.schedule[day];return {open:minute>=from&&minute<to,today:fmt(from)+'–'+fmt(to),source:entry.source,kind:'published'};}
+  return null;
 }
 ['showopen','showclosed','showunknown'].forEach(id=>document.getElementById(id).addEventListener('change',()=>{showMarkers(visibleReachable().map(x=>x.f));renderResults()}));
 function visibleReachable(){return reachable.filter(x=>{const h=hoursInfo(x.f);return h?document.getElementById(h.open?'showopen':'showclosed').checked:document.getElementById('showunknown').checked})}
@@ -327,14 +368,14 @@ function renderResults(){
   if(!visible.length){results.textContent='No facilities match the selected opening-hours filters.';return}
   for(let obj of visible.slice(0,80)){
     let p=obj.f.properties,el=document.createElement('div');el.className='facility';
-    el.innerHTML='<b>'+safe(p.name)+'</b><br><span class="small">'+safe(p.category)+' · '+safe(p.group)+'<br>'+safe(p.hours?'Dataset hours (unverified): '+p.hours:'')+'</span>';
+    el.innerHTML='<b>'+safe(p.name)+'</b><br><span class="small">'+safe(p.category)+' · '+safe(p.group)+'<br>'+safe(p.opening_ho?'Dataset schedule: '+p.opening_ho:'')+'</span>';
     const h=hoursInfo(obj.f);
     const info=document.createElement('div');
     if(h){
       const pill=document.createElement('span');pill.className='hours-pill '+(h.open?'open':'closed');
-      pill.textContent=(h.open?'Open now (regular hours)':'Closed now (regular hours)')+' · Today '+h.today;
+      pill.textContent=(h.open?'Open now':'Closed now')+' · Today '+h.today+' ('+(h.kind==='dataset'?'dataset schedule':'published schedule')+')';
       const source=document.createElement('a');source.className='hours-source';source.href=h.source;source.target='_blank';source.rel='noopener noreferrer';source.textContent='Check official hours and exceptions ↗';
-      info.append(pill,document.createElement('br'),source);
+      info.append(pill);if(h.source)info.append(document.createElement('br'),source);
     }else{info.className='small';info.textContent='Unknown hours';}
     el.append(info);
     let actions=document.createElement('div');actions.className='facility-actions';
