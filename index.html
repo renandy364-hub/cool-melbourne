@@ -118,6 +118,7 @@ function setStart(lat,lng){start=[lng,lat];if(startMarker)map.removeLayer(startM
 map.on('click',e=>setStart(e.latlng.lat,e.latlng.lng));document.getElementById('gps').onclick=()=>{if(!navigator.geolocation)return message('Geolocation unavailable. Search an address instead.');message('Finding your location…');navigator.geolocation.getCurrentPosition(p=>setStart(p.coords.latitude,p.coords.longitude),e=>message('Location unavailable: '+e.message),{enableHighAccuracy:true,timeout:12000})};
 document.getElementById('search').onclick=async()=>{let q=document.getElementById('address').value.trim();if(!q)return message('Enter an address first.');message('Searching address…');try{let r=await fetch('https://photon.komoot.io/api/?limit=1&q='+encodeURIComponent(q));if(!r.ok)throw Error('Address search unavailable');let d=await r.json();if(!d.features.length)throw Error('Address not found; try adding Melbourne, VIC');let [lng,lat]=d.features[0].geometry.coordinates;setStart(lat,lng)}catch(e){message(e.message)}};
 
+
 async function ors(endpoint, payload) {
   const workerURL =
     "https://cool-melbourne-routing.renandy364.workers.dev";
@@ -135,14 +136,16 @@ async function ors(endpoint, payload) {
   });
 
   if (!response.ok) {
+    const message = await response.text();
     throw new Error(
-      "Routing service error: " + response.status
+      "Routing service error " +
+      response.status + ": " + message
     );
   }
 
-  return response.json();
+  return await response.json();
 }
-{let key=document.getElementById('key').value.trim();if(!key)throw Error('Paste your openrouteservice API key first.');let r=await fetch('https://api.openrouteservice.org/v2/'+endpoint,{method:'POST',headers:{'Authorization':key,'Content-Type':'application/json','Accept':'application/json, application/geo+json'},body:JSON.stringify(payload)});if(!r.ok){let body=await r.text();throw Error('Routing service error '+r.status+': '+body.slice(0,160))}return r.json()}
+
 function selected(f){return document.getElementById(f.properties.group).checked}function showMarkers(items){markers.clearLayers();for(let f of items){let [lng,lat]=f.geometry.coordinates,p=f.properties;L.marker([lat,lng],{icon:symbol(p.group==='indoor'?'indoor':'outdoor')}).addTo(markers).bindPopup('<b>'+safe(p.name)+'</b><br>'+safe(p.category))}}
 async function load(){try{let [a,b]=await Promise.all(['indoor','outdoor'].map(x=>fetch('cooling_'+x+'.geojson').then(r=>{if(!r.ok)throw Error('Missing GeoJSON file');return r.json()})));features=[...a.features,...b.features].filter(f=>f.geometry?.type==='Point');message(features.length+' facilities loaded. Select your location.');}catch(e){message('Could not load facility data: '+e.message+'. Run using a local web server, not file://.')}}load();
 document.getElementById('calculate').onclick=async()=>{if(!start)return message('Choose your location first.');message('Calculating 10-minute walking catchment…');results.innerHTML='';directions.textContent='Choose a reachable facility.';try{let d=await ors('isochrones/foot-walking',{locations:[start],range:[600],range_type:'time'});if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);iso=L.geoJSON(d,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.27}}).addTo(map);let poly=d.features[0];reachable=features.filter(f=>selected(f)&&turf.booleanPointInPolygon(f,poly)).map(f=>({f,straight:turf.distance(turf.point(start),f,{units:'kilometers'})})).sort((a,b)=>a.straight-b.straight);showMarkers(reachable.map(x=>x.f));document.getElementById('count').textContent='('+reachable.length+')';message('Catchment calculated. Listed facilities fall within the approximate 10-minute walking area. Select one for an actual route and travel time.');map.fitBounds(iso.getBounds(),{padding:[18,18]});renderResults()}catch(e){message(e.message)}};
