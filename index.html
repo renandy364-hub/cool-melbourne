@@ -113,7 +113,14 @@ button{background:#2679ae}
 .route-actions .go{background:#174f78}.step-current{background:#e2f2fd;border-left:3px solid #2679ae;padding:10px;margin:9px 0;line-height:1.5}
 .facility .facility-actions{display:flex;gap:7px;flex-wrap:wrap}.facility-actions button{margin-top:9px}
 .leaflet-popup-content .popup-route{background:#174f78;color:white;border:0;padding:9px 12px;border-radius:4px;cursor:pointer;margin-top:8px}
-</style></head><body><header><div class="brand"><div class="eyebrow">COOL MELBOURNE / URBAN HEAT ACCESS</div><h1>Explore your<br><em>cooling options.</em></h1><p class="hero-desc">Find potential indoor and outdoor cooling resources within a 10-minute walk of your chosen location.</p></div><div class="hero-side"><span class="hero-number">10<span>MIN</span></span><span class="hero-caption">WALKING ACCESS<br>EXPLORER</span></div></header><div class="layout"><aside><div class="sidebar-top"><span class="live-dot"></span> INTERACTIVE EXPLORER <span class="sidebar-index">01 / 03</span></div><p class="intro">Choose a starting point, select your resources and discover what you can reach on foot.</p><div class="section-title">01 / Choose your location</div><div class="panel"><label for="address">Your starting location</label><input id="address" placeholder="e.g. Richmond Station, Melbourne"><div class="controls"><button id="search">Search address</button><button class="secondary" id="gps">Use my location</button></div><p class="small">Or click anywhere on the map to set your starting point.</p></div><div class="section-title">02 / Explore cooling access</div><div class="panel"><label style="margin-top:0">Facility categories</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="indoor" checked> Indoor facilities</label><span>▣</span></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="outdoor" checked> Outdoor resources</label><span>♧</span></div><button id="calculate">Find facilities within 10 minutes</button><div id="status" class="hint">Select a starting location to begin.</div></div><div class="section-title">03 / Your results</div><h3>Reachable facilities <span id="count"></span></h3><div id="results"></div><h3>Walking directions</h3><div id="directions" class="small">Choose a reachable facility and select Get directions.</div><p class="small disclaimer">Prototype only. Opening hours, public access, entrances and cooling suitability require verification. Routing depends on OpenStreetMap coverage.</p></aside><div class="map-shell"><div id="map"></div><div class="map-badge"><span class="live-dot"></span> MELBOURNE · WALKING NETWORK</div><div class="map-legend"><strong>MAP KEY</strong><span><i class="legend-symbol sym-indoor"><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg></i>Indoor facilities</span><span><i class="legend-symbol sym-outdoor"><svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg></i>Outdoor resources</span><span><i class="legend-symbol sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></i>Starting location</span><span><i class="legend-dot" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute area</span><span><i class="route-swatch"></i>Walking route</span></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script>
+
+/* Live walking guidance */
+.nav-panel{position:absolute;z-index:750;bottom:18px;left:18px;width:min(380px,calc(100% - 36px));background:#fff;border:1px solid #cde1ef;box-shadow:0 8px 30px #153f6650;border-radius:12px;padding:15px;display:none}
+.nav-panel.visible{display:block}.nav-panel h3{margin:2px 0 7px;font-size:15px}.nav-main{font:800 19px Manrope,sans-serif;color:#174f78;line-height:1.3}.nav-sub{color:#54758b;font-size:12px;margin:7px 0}.nav-panel button{margin-right:7px}.nav-panel .stop{background:#e9f2f8;color:#174f78}
+.nav-turn-icon{background:#fff;color:#174f78;border:3px solid #ee854b;border-radius:50%;width:26px;height:26px;display:grid;place-items:center;font-weight:800;box-shadow:0 2px 8px #123e6244}
+.live-gps{width:17px;height:17px;background:#177bdb;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 3px #177bdb66,0 2px 8px #102e4980}
+@media(max-width:700px){.nav-panel{bottom:8px;left:8px;width:calc(100% - 16px);padding:11px}.map-legend{bottom:180px;right:8px;max-width:145px}}
+</style></head><body><header><div class="brand"><div class="eyebrow">COOL MELBOURNE / URBAN HEAT ACCESS</div><h1>Explore your<br><em>cooling options.</em></h1><p class="hero-desc">Find potential indoor and outdoor cooling resources within a 10-minute walk of your chosen location.</p></div><div class="hero-side"><span class="hero-number">10<span>MIN</span></span><span class="hero-caption">WALKING ACCESS<br>EXPLORER</span></div></header><div class="layout"><aside><div class="sidebar-top"><span class="live-dot"></span> INTERACTIVE EXPLORER <span class="sidebar-index">01 / 03</span></div><p class="intro">Choose a starting point, select your resources and discover what you can reach on foot.</p><div class="section-title">01 / Choose your location</div><div class="panel"><label for="address">Your starting location</label><input id="address" placeholder="e.g. Richmond Station, Melbourne"><div class="controls"><button id="search">Search address</button><button class="secondary" id="gps">Use my location</button></div><p class="small">Or click anywhere on the map to set your starting point.</p></div><div class="section-title">02 / Explore cooling access</div><div class="panel"><label style="margin-top:0">Facility categories</label><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="indoor" checked> Indoor facilities</label><span>▣</span></div><div class="category-row"><label style="font-weight:500"><input type="checkbox" id="outdoor" checked> Outdoor resources</label><span>♧</span></div><button id="calculate">Find facilities within 10 minutes</button><div id="status" class="hint">Select a starting location to begin.</div></div><div class="section-title">03 / Your results</div><h3>Reachable facilities <span id="count"></span></h3><div id="results"></div><h3>Walking directions</h3><div id="directions" class="small">Choose a reachable facility and select Get directions.</div><p class="small disclaimer">Prototype only. Opening hours, public access, entrances and cooling suitability require verification. Routing depends on OpenStreetMap coverage.</p></aside><div class="map-shell"><div id="map"></div><div id="live-nav" class="nav-panel" role="status" aria-live="polite"><h3>WALKING NAVIGATION</h3><div id="nav-instruction" class="nav-main">Preparing your route…</div><div id="nav-distance" class="nav-sub"></div><div id="nav-warning" class="small"></div><button id="nav-recenter" class="secondary">Centre on me</button><button id="nav-stop" class="stop">Stop navigation</button></div><div class="map-badge"><span class="live-dot"></span> MELBOURNE · WALKING NETWORK</div><div class="map-legend"><strong>MAP KEY</strong><span><i class="legend-symbol sym-indoor"><svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg></i>Indoor facilities</span><span><i class="legend-symbol sym-outdoor"><svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg></i>Outdoor resources</span><span><i class="legend-symbol sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></i>Starting location</span><span><i class="legend-dot" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute area</span><span><i class="route-swatch"></i>Walking route</span></div></div></div><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/@turf/turf@6.5.0/turf.min.js"></script><script>
 const icons={
  indoor:'<svg viewBox="0 0 24 24"><path d="M4 21V7l8-4 8 4v14M9 21v-6h6v6M8 9h1m6 0h1M8 12h1m6 0h1"/></svg>',
  outdoor:'<svg viewBox="0 0 24 24"><path d="M12 21v-9m0 5-5-3m5 0 5-4M12 3c-4 0-7 3-7 7a5 5 0 0 0 7 5 5 5 0 0 0 7-5c0-4-3-7-7-7Z"/></svg>'
@@ -122,7 +129,7 @@ function symbol(group){return L.divIcon({className:'',html:'<div class="sym-icon
 const map=L.map('map').setView([-37.8136,144.9631],12);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap contributors',maxZoom:19}).addTo(map);
 const status=document.getElementById('status'),results=document.getElementById('results'),directions=document.getElementById('directions');let start=null,startMarker=null,iso=null,route=null,features=[],markers=L.layerGroup().addTo(map),reachable=[];
 function message(s){status.textContent=s}function safe(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function setStart(lat,lng){start=[lng,lat];if(startMarker)map.removeLayer(startMarker);startMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></div>',iconSize:[32,42],iconAnchor:[16,39],popupAnchor:[0,-38]})}).addTo(map).bindPopup('Starting location').openPopup();map.setView([lat,lng],14);message('Location selected. Click Find facilities within 10 minutes.');if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);markers.clearLayers();results.innerHTML='';directions.textContent='Choose a reachable facility.';activeFacility=null;activeSteps=[];if(stepMarker){map.removeLayer(stepMarker);stepMarker=null}}
+function setStart(lat,lng){stopLiveNavigation();start=[lng,lat];if(startMarker)map.removeLayer(startMarker);startMarker=L.marker([lat,lng],{icon:L.divIcon({className:'',html:'<div class="sym-start"><svg viewBox="0 0 32 42" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16 2C8.3 2 2 8.3 2 16c0 10 14 23 14 23s14-13 14-23C30 8.3 23.7 2 16 2Z" fill="#174F78" stroke="#fff" stroke-width="2"/><circle cx="16" cy="16" r="5" fill="#fff"/></svg></div>',iconSize:[32,42],iconAnchor:[16,39],popupAnchor:[0,-38]})}).addTo(map).bindPopup('Starting location').openPopup();map.setView([lat,lng],14);message('Location selected. Click Find facilities within 10 minutes.');if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);markers.clearLayers();results.innerHTML='';directions.textContent='Choose a reachable facility.';activeFacility=null;activeSteps=[];if(stepMarker){map.removeLayer(stepMarker);stepMarker=null}}
 map.on('click',e=>setStart(e.latlng.lat,e.latlng.lng));document.getElementById('gps').onclick=()=>{if(!navigator.geolocation)return message('Geolocation unavailable. Search an address instead.');message('Finding your location…');navigator.geolocation.getCurrentPosition(p=>setStart(p.coords.latitude,p.coords.longitude),e=>message('Location unavailable: '+e.message),{enableHighAccuracy:true,timeout:12000})};
 document.getElementById('search').onclick=async()=>{let q=document.getElementById('address').value.trim();if(!q)return message('Enter an address first.');message('Searching address…');try{let r=await fetch('https://photon.komoot.io/api/?limit=1&q='+encodeURIComponent(q));if(!r.ok)throw Error('Address search unavailable');let d=await r.json();if(!d.features.length)throw Error('Address not found; try adding Melbourne, VIC');let [lng,lat]=d.features[0].geometry.coordinates;setStart(lat,lng)}catch(e){message(e.message)}};
 
@@ -156,6 +163,120 @@ async function ors(endpoint, payload) {
 
 function selected(f){return document.getElementById(f.properties.group).checked}
 let activeFacility=null,activeSteps=[],activeRouteData=null,activeStepIndex=0,stepMarker=null;
+let liveWatch=null,liveMarker=null,turnMarkers=L.layerGroup().addTo(map),liveRouteLine=null,lastGps=null;
+let liveStepOffsets=[],liveRouteLength=0,liveLastStep=-1,liveOffRoute=false;
+let offRouteFixes=0,rerouting=false,lastRerouteAt=0,navSession=0;
+const REROUTE_COOLDOWN=45000;
+const navPanel=document.getElementById('live-nav');
+function stopLiveNavigation(){
+  if(liveWatch!==null){navigator.geolocation.clearWatch(liveWatch);liveWatch=null}
+  navPanel.classList.remove('visible');if(liveMarker){map.removeLayer(liveMarker);liveMarker=null}
+  turnMarkers.clearLayers();lastGps=null;liveLastStep=-1;offRouteFixes=0;navSession++;
+}
+document.getElementById('nav-stop').onclick=()=>{stopLiveNavigation();message('Live navigation stopped. Your route preview is still available.')};
+document.getElementById('nav-recenter').onclick=()=>{if(lastGps)map.setView(lastGps,17)};
+function applyLiveRoute(d){
+  const coords=d.features?.[0]?.geometry?.coordinates;
+  if(!coords||coords.length<2||!d.features[0].properties?.summary)throw Error('No usable route returned');
+  activeRouteData=d;
+  activeSteps=d.features[0].properties.segments?.[0]?.steps||[];
+  liveRouteLine=turf.lineString(coords);
+  liveRouteLength=turf.length(liveRouteLine,{units:'kilometers'})*1000;
+  liveStepOffsets=activeSteps.map(step=>{
+    const index=Math.max(0,Math.min(coords.length-1,step.way_points?.[0]??0));
+    return index===0?0:turf.length(turf.lineString(coords.slice(0,index+1)),{units:'kilometers'})*1000;
+  });
+  if(liveStepOffsets.length)liveStepOffsets[0]=0;
+  turnMarkers.clearLayers();
+  activeSteps.forEach((step,i)=>{
+    const index=step.way_points?.[0];
+    if(!Number.isInteger(index)||!coords[index])return;
+    L.marker([coords[index][1],coords[index][0]],{
+      icon:L.divIcon({className:'',html:'<div class="nav-turn-icon">'+(i+1)+'</div>',iconSize:[26,26],iconAnchor:[13,13]})
+    }).addTo(turnMarkers).bindPopup('Step '+(i+1)+': '+safe(step.instruction));
+  });
+  if(route)map.removeLayer(route);
+  route=L.featureGroup([
+    L.geoJSON(d,{style:{color:'#fff',weight:11,opacity:.96,lineCap:'round',lineJoin:'round',interactive:false}}),
+    L.geoJSON(d,{style:{color:'#ee854b',weight:6,lineCap:'round',lineJoin:'round'}}),
+    L.circleMarker([activeFacility.geometry.coordinates[1],activeFacility.geometry.coordinates[0]],{
+      radius:7,color:'#fff',weight:3,fillColor:'#ee854b',fillOpacity:1
+    })
+  ]).addTo(map);
+  if(stepMarker){map.removeLayer(stepMarker);stepMarker=null}
+  liveLastStep=-1;
+  const metrics=document.querySelector('.route-metrics');
+  if(metrics){
+    const values=metrics.querySelectorAll('strong');
+    if(values[0])values[0].textContent=distanceLabel(d.features[0].properties.summary.distance);
+    if(values[1])values[1].textContent=Math.ceil(d.features[0].properties.summary.duration/60)+' min';
+  }
+}
+async function recalculateFromGps(lat,lng,session){
+  if(rerouting||!activeFacility||!navPanel.classList.contains('visible'))return;
+  rerouting=true;lastRerouteAt=Date.now();offRouteFixes=0;
+  const warning=document.getElementById('nav-warning');
+  warning.textContent='Off route detected. Calculating a new walking route…';
+  try{
+    const d=await ors('directions/foot-walking/geojson',{
+      coordinates:[[lng,lat],activeFacility.geometry.coordinates],instructions:true
+    });
+    if(session!==navSession||!navPanel.classList.contains('visible'))return;
+    applyLiveRoute(d);
+    warning.textContent='New route ready. Follow the updated orange line; check crossings and signs.';
+    document.getElementById('nav-instruction').textContent=activeSteps[0]?.instruction||'Follow the updated route';
+    document.getElementById('nav-distance').textContent=distanceLabel(d.features[0].properties.summary.distance)+' remaining';
+    message('Your walking route has been recalculated from your latest GPS position.');
+  }catch(e){
+    if(session===navSession){
+      warning.textContent='Could not recalculate: '+e.message+'. Follow the original route or retry later.';
+    }
+  }finally{rerouting=false}
+}
+function startLiveNavigation(){
+  if(!activeRouteData||!activeSteps.length)return message('Choose a route first.');
+  if(!navigator.geolocation)return message('This browser does not support live location.');
+  stopLiveNavigation();
+  const coords=activeRouteData.features[0].geometry.coordinates;
+  if(!coords||coords.length<2)return message('This route has no navigable geometry.');
+  applyLiveRoute(activeRouteData);
+  const session=navSession;
+  navPanel.classList.add('visible');
+  document.getElementById('nav-instruction').textContent='Waiting for your GPS location…';
+  document.getElementById('nav-distance').textContent='Allow location access when prompted.';
+  document.getElementById('nav-warning').textContent='GPS is approximate. Check crossings and street signs; this is not safety-critical navigation.';
+  liveWatch=navigator.geolocation.watchPosition(position=>{
+    const {latitude,longitude,accuracy}=position.coords;lastGps=[latitude,longitude];
+    if(!liveMarker){liveMarker=L.marker(lastGps,{icon:L.divIcon({className:'',html:'<div class="live-gps"></div>',iconSize:[17,17],iconAnchor:[8,8]})}).addTo(map);map.setView(lastGps,17)}
+    else liveMarker.setLatLng(lastGps);
+    if(rerouting)return;
+    const nearest=turf.nearestPointOnLine(liveRouteLine,turf.point([longitude,latitude]),{units:'kilometers'});
+    const offMetres=nearest.properties.dist*1000;
+    const alongMetres=nearest.properties.location*1000;
+    const remaining=Math.max(0,liveRouteLength-alongMetres);
+    let nextIndex=activeSteps.findIndex((step,i)=>i>0&&liveStepOffsets[i]>alongMetres+8);
+    if(nextIndex<0)nextIndex=activeSteps.length-1;
+    const next=activeSteps[nextIndex];
+    const untilTurn=Math.max(0,liveStepOffsets[nextIndex]-alongMetres);
+    const warning=document.getElementById('nav-warning');
+    if(accuracy<=35&&offMetres>Math.max(45,accuracy*2)){
+      offRouteFixes++;
+      warning.textContent='You appear to be '+distanceLabel(offMetres)+' away from the route. Checking your position…';
+      if(offRouteFixes>=2&&!rerouting&&Date.now()-lastRerouteAt>REROUTE_COOLDOWN){
+        recalculateFromGps(latitude,longitude,session);
+      }
+    }else if(accuracy>35){offRouteFixes=0;warning.textContent='GPS accuracy is approximately '+Math.round(accuracy)+' m. Waiting for a more accurate fix before rerouting.'}
+    else{offRouteFixes=0;if(!rerouting)warning.textContent='Check crossings, access restrictions and street signs. GPS and facility entrances may be imprecise.'}
+    document.getElementById('nav-instruction').textContent=remaining<20?'You are near the destination':next.instruction;
+    document.getElementById('nav-distance').textContent=(remaining<20?'Destination nearby':'Next instruction in '+distanceLabel(untilTurn))+' · '+distanceLabel(remaining)+' remaining';
+    if(!rerouting&&liveLastStep!==nextIndex){liveLastStep=nextIndex;if(nextIndex>=0&&nextIndex<activeSteps.length){activeStepIndex=nextIndex;showStep(false)}}
+  },err=>{
+    document.getElementById('nav-instruction').textContent='Live location unavailable';
+    document.getElementById('nav-warning').textContent=err.message+' You can still use the manual step-by-step preview.';
+    if(err.code===1&&liveWatch!==null){navigator.geolocation.clearWatch(liveWatch);liveWatch=null}
+  },{enableHighAccuracy:true,maximumAge:2500,timeout:15000});
+}
+
 function distanceLabel(m){return m<1000?Math.round(m)+' m':(m/1000).toFixed(2)+' km'}
 function showMarkers(items){
   markers.clearLayers();
@@ -171,7 +292,7 @@ function showMarkers(items){
   }
 }
 async function load(){try{let [a,b]=await Promise.all(['indoor','outdoor'].map(x=>fetch('cooling_'+x+'.geojson').then(r=>{if(!r.ok)throw Error('Missing GeoJSON file');return r.json()})));features=[...a.features,...b.features].filter(f=>f.geometry?.type==='Point');message(features.length+' facilities loaded. Select your location.');}catch(e){message('Could not load facility data: '+e.message+'. Run using a local web server, not file://.')}}load();
-document.getElementById('calculate').onclick=async()=>{if(!start)return message('Choose your location first.');message('Calculating 10-minute walking catchment…');results.innerHTML='';directions.textContent='Choose a reachable facility.';try{let d=await ors('isochrones/foot-walking',{locations:[start],range:[600],range_type:'time'});if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);iso=L.geoJSON(d,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.27}}).addTo(map);let poly=d.features[0];reachable=features.filter(f=>selected(f)&&turf.booleanPointInPolygon(f,poly)).map(f=>({f,straight:turf.distance(turf.point(start),f,{units:'kilometers'})})).sort((a,b)=>a.straight-b.straight);showMarkers(reachable.map(x=>x.f));document.getElementById('count').textContent='('+reachable.length+')';message('Catchment calculated. Listed facilities fall within the approximate 10-minute walking area. Select one for an actual route and travel time.');map.fitBounds(iso.getBounds(),{padding:[18,18]});renderResults()}catch(e){message(e.message)}};
+document.getElementById('calculate').onclick=async()=>{stopLiveNavigation();if(!start)return message('Choose your location first.');message('Calculating 10-minute walking catchment…');results.innerHTML='';directions.textContent='Choose a reachable facility.';try{let d=await ors('isochrones/foot-walking',{locations:[start],range:[600],range_type:'time'});if(iso)map.removeLayer(iso);if(route)map.removeLayer(route);iso=L.geoJSON(d,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.27}}).addTo(map);let poly=d.features[0];reachable=features.filter(f=>selected(f)&&turf.booleanPointInPolygon(f,poly)).map(f=>({f,straight:turf.distance(turf.point(start),f,{units:'kilometers'})})).sort((a,b)=>a.straight-b.straight);showMarkers(reachable.map(x=>x.f));document.getElementById('count').textContent='('+reachable.length+')';message('Catchment calculated. Listed facilities fall within the approximate 10-minute walking area. Select one for an actual route and travel time.');map.fitBounds(iso.getBounds(),{padding:[18,18]});renderResults()}catch(e){message(e.message)}};
 function renderResults(){
   results.innerHTML='';
   if(!reachable.length){results.textContent='No facilities found for these categories in this catchment.';return}
@@ -184,7 +305,7 @@ function renderResults(){
   }
   if(reachable.length>80){let el=document.createElement('p');el.className='small';el.textContent='Showing first 80 by straight-line distance. Map markers show all matches.';results.append(el)}
 }
-function showStep(){
+function showStep(pan=true){
   const step=activeSteps[activeStepIndex];if(!step)return;
   let current=document.getElementById('current-step');if(!current)return;
   current.textContent='Step '+(activeStepIndex+1)+' of '+activeSteps.length+': '+step.instruction+' ('+distanceLabel(step.distance)+')';
@@ -193,7 +314,7 @@ function showStep(){
   if(stepMarker){map.removeLayer(stepMarker);stepMarker=null}
   const coords=activeRouteData?.features?.[0]?.geometry?.coordinates;
   const point=coords?.[step.way_points?.[0]];
-  if(point){stepMarker=L.circleMarker([point[1],point[0]],{radius:7,color:'#174f78',fillColor:'#ffffff',fillOpacity:1,weight:3}).addTo(map);map.panTo([point[1],point[0]])}
+  if(point){stepMarker=L.circleMarker([point[1],point[0]],{radius:7,color:'#174f78',fillColor:'#ffffff',fillOpacity:1,weight:3}).addTo(map);if(pan)map.panTo([point[1],point[0]])}
 }
 function startDirections(){
   if(!activeSteps.length){message('No written steps available for this route. Follow the highlighted line on the map.');return}
@@ -204,6 +325,7 @@ function startDirections(){
   message('Step-by-step route preview started. This is not live GPS navigation.');
 }
 async function getRoute(f){
+  stopLiveNavigation();
   if(!start)return message('Choose your starting location first.');
   message('Calculating walking route…');
   directions.innerHTML='<div class="route-preview">Calculating walking route…</div>';
@@ -232,7 +354,8 @@ async function getRoute(f){
     metrics.append(distance,time);card.append(metrics);
     let actions=document.createElement('div');actions.className='route-actions';
     let startBtn=document.createElement('button');startBtn.id='start-directions';startBtn.className='go';startBtn.textContent='Start directions';startBtn.onclick=startDirections;
-    actions.append(startBtn);card.append(actions);
+    let liveBtn=document.createElement('button');liveBtn.className='go';liveBtn.textContent='Follow route with live GPS';liveBtn.onclick=startLiveNavigation;
+    actions.append(startBtn,liveBtn);card.append(actions);
     let guide=document.createElement('div');guide.id='route-guide';guide.hidden=true;
     let note=document.createElement('p');note.className='small';note.textContent='Follow the orange route. Steps are a preview, not live GPS navigation.';
     let current=document.createElement('div');current.id='current-step';current.className='step-current';
