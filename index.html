@@ -547,88 +547,71 @@ async function getRoute(f){
 }
 </script>
 <style>
-#cool-print-button{position:absolute;z-index:900;top:16px;right:16px;background:#174f78;color:#fff;border:2px solid #fff;border-radius:8px;padding:11px 16px;font:700 13px Arial,sans-serif;box-shadow:0 2px 12px #0003;cursor:pointer}
-#cool-print-button:focus-visible{outline:3px solid #e6b55e}
+#cool-print-button{position:absolute;z-index:900;top:16px;right:16px;background:#174f78;color:white;border:2px solid white;border-radius:8px;padding:11px 16px;font:700 13px Arial;cursor:pointer}
+#cm-print-preview{display:none;position:fixed;inset:0;z-index:99999;background:#dce4e9;overflow:auto;padding:20px 0;font-family:Arial,sans-serif;color:#17365b}
+#cm-print-preview.active{display:block}
+#cm-print-actions{width:210mm;max-width:95vw;margin:0 auto 10px;display:flex;gap:12px;align-items:center;justify-content:space-between;background:#17365b;color:#fff;padding:12px;border-radius:6px;font-size:13px}
+#cm-print-actions button{border:0;border-radius:5px;background:white;color:#17365b;padding:10px 15px;font-weight:bold;cursor:pointer}
+#cm-print-sheet{width:210mm;height:297mm;margin:0 auto;background:white;padding:12mm;display:flex;flex-direction:column;box-sizing:border-box;box-shadow:0 5px 30px #0003}
+#cm-print-sheet *{box-sizing:border-box}
+#cm-print-sheet h1{font-size:25px;line-height:1.2;margin:8px 0 5px;color:#17365b}
+#cm-print-sheet .cm-sub{font-size:12px;color:#4e6b80;margin:0 0 10px}
+#cm-print-sheet .cm-info{padding:10px 12px;background:#eaf3f8;border-radius:5px;font-size:12px;line-height:1.6;margin-bottom:12px}
+#cm-print-map-holder{height:177mm;width:100%;position:relative;border:1px solid #b9cdd9;overflow:hidden;background:#edf3f5;flex:none}
+#cm-print-map-holder #map{height:100%!important;min-height:0!important;width:100%!important}
+#cm-print-sheet .cm-legend{font-size:11px;display:flex;gap:13px;flex-wrap:wrap;margin:11px 0}
+#cm-print-sheet .cm-legend span{display:inline-flex;gap:6px;align-items:center}
+#cm-print-sheet .cm-dot{display:inline-block;width:12px;height:12px;border-radius:50%;border:1px solid #fff}
+#cm-print-sheet .cm-note{font-size:10px;line-height:1.5;color:#506878;border-top:1px solid #dce5ea;padding-top:9px;margin-top:3px}
+#cm-print-sheet .cm-footer{font-size:9px;color:#667f8c;margin-top:auto;display:flex;justify-content:space-between}
+@page{size:A4 portrait;margin:0}
+@media print{
+ html,body{width:210mm!important;height:297mm!important;margin:0!important;padding:0!important;background:white!important;overflow:visible!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ body> :not(#cm-print-preview){display:none!important}
+ #cm-print-preview{display:block!important;position:static!important;inset:auto!important;width:210mm!important;height:297mm!important;padding:0!important;margin:0!important;background:white!important;overflow:hidden!important}
+ #cm-print-actions{display:none!important}
+ #cm-print-sheet{width:210mm!important;height:297mm!important;margin:0!important;box-shadow:none!important}
+ #cm-print-map-holder .leaflet-control-zoom{display:none!important}
+}
 </style>
 <script>
 (function(){
-const btn=document.createElement('button');
-btn.id='cool-print-button';btn.type='button';btn.textContent='Print A4 map';
-btn.title='Create a high-resolution A4 printable map of the current 10-minute walking catchment';
-document.querySelector('.map-shell').appendChild(btn);
-btn.addEventListener('click',function(){
- if(!start||!iso){alert('First choose a starting location and calculate your 10-minute walking catchment.');return;}
- const printWindow=window.open('','_blank');
- if(!printWindow){alert('Allow pop-ups for this site to create a printable map.');return;}
- const filtered=typeof visibleReachable==='function'?visibleReachable().map(x=>x.f):reachable.map(x=>x.f);
- const payload={
-  start:start,catchment:iso.toGeoJSON(),facilities:filtered.map(f=>({coordinates:f.geometry.coordinates,group:f.properties?.group||'outdoor'})),
-  route:route&&typeof route.toGeoJSON==='function'?route.toGeoJSON():null,
-  address:document.getElementById('address')?.value?.trim()||'Selected map location',
-  generated:new Date().toLocaleDateString('en-AU')
- };
- const data=JSON.stringify(payload).replace(/</g,'\\u003c');
- const html=`<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Cool Melbourne — A4 printable walking map</title>
- <meta name="viewport" content="width=device-width, initial-scale=1">
- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
- <style>
- *{box-sizing:border-box}body{margin:0;background:#e6edf2;color:#17365b;font:14px Arial,sans-serif}
- .toolbar{background:#17365b;color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px}
- .toolbar button{background:#fff;color:#17365b;border:0;padding:11px 17px;border-radius:5px;font-weight:700;cursor:pointer}.toolbar button:disabled{opacity:.5;cursor:wait}
- .page{width:210mm;height:297mm;margin:12mm auto;background:#fff;padding:13mm;display:flex;flex-direction:column;box-shadow:0 4px 25px #0002;overflow:hidden}
- .eyebrow{font-weight:700;font-size:10px;letter-spacing:2px;color:#27776c}
- h1{font-size:27px;letter-spacing:-.8px;margin:8px 0 4px}h2{font-size:13px;font-weight:500;margin:0 0 12px;color:#526e7d}
- .details{padding:11px 13px;background:#eaf3f8;border-radius:6px;font-size:12px;margin-bottom:11px}
- #print-map{width:100%;height:176mm;min-height:176mm;flex:none;border:1px solid #cddbe4;background:#eef1ec;position:relative;overflow:hidden}
- .legend{display:flex;flex-wrap:wrap;gap:10px 17px;margin-top:12px;font-size:11px}
- .legend span{display:inline-flex;align-items:center;gap:6px}.swatch{width:13px;height:13px;border-radius:50%;display:inline-block}
- .note{margin-top:11px;padding-top:9px;border-top:1px solid #dce5ea;color:#506878;font-size:10px;line-height:1.5}
- .foot{display:flex;justify-content:space-between;margin-top:7px;font-size:9px;color:#6b7f8c}
- .leaflet-control-attribution{font-size:8px!important}
- @page{size:A4 portrait;margin:0}
- @media print{html,body{width:210mm;height:297mm;margin:0!important;background:#fff!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
- .toolbar{display:none!important}.page{margin:0;box-shadow:none;break-after:avoid}
- .leaflet-control-zoom{display:none!important}.leaflet-pane,.leaflet-map-pane,.leaflet-overlay-pane,.leaflet-marker-pane,.leaflet-tile-pane{visibility:visible!important}.leaflet-overlay-pane svg{display:block!important;visibility:visible!important}}
- </style></head><body>
- <div class="toolbar"><span id="print-status">Preparing the catchment and facility layers…</span><button id="do-print" disabled>Preparing map…</button></div>
- <main class="page"><div class="eyebrow">COOL MELBOURNE / PRINTABLE WALKING MAP</div>
- <h1>Find cooling resources nearby</h1><h2>Facilities within a modelled 10-minute pedestrian-network catchment</h2>
- <div class="details"><strong>Starting point:</strong> <span id="location"></span><br><strong>Reachable mapped facilities:</strong> <span id="total"></span></div>
- <div id="print-map" role="img" aria-label="Map of 10-minute walking catchment and facilities"></div>
- <div class="legend">
- <span><i class="swatch" style="background:#174f78"></i>Starting point</span>
- <span><i class="swatch" style="background:#2862aa"></i>Indoor facilities</span>
- <span><i class="swatch" style="background:#268f7e"></i>Outdoor resources</span>
- <span><i class="swatch" style="background:#c6e8f8;border:1px solid #4096cb"></i>10-minute catchment</span>
- <span><i class="swatch" style="background:#ee854b"></i>Selected walking route (if shown)</span>
- </div>
- <div class="note"><strong>Important:</strong> Walking times are modelled and vary by person. Facility locations, opening hours, public access and suitability are not verified in real time. This printed map does not update automatically. Confirm access before travelling where possible.</div>
- <div class="foot"><span>Map data © OpenStreetMap contributors · Cool Melbourne</span><span id="date"></span></div>
- </main>
- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"><\/script>
- <script>
- const d=${data};
- document.getElementById('location').textContent=d.address==='Selected map location'?d.start[1].toFixed(5)+', '+d.start[0].toFixed(5):d.address;
- document.getElementById('total').textContent=d.facilities.length;
- document.getElementById('date').textContent='Prepared '+d.generated;
- const m=L.map('print-map',{zoomControl:false,preferCanvas:false,attributionControl:true,fadeAnimation:false,zoomAnimation:false});
- const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(m);
- const area=L.geoJSON(d.catchment,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.28}}).addTo(m);
- d.facilities.forEach(f=>{const latlng=[f.coordinates[1],f.coordinates[0]];L.circleMarker(latlng,{radius:5,color:'#fff',weight:1.4,fillColor:f.group==='indoor'?'#2862aa':'#268f7e',fillOpacity:1}).addTo(m)});
- L.circleMarker([d.start[1],d.start[0]],{radius:8,color:'#fff',weight:3,fillColor:'#174f78',fillOpacity:1}).addTo(m);
- if(d.route){L.geoJSON(d.route,{style:{color:'#ee854b',weight:4}}).addTo(m)}
- const printBtn=document.getElementById('do-print');
- const printStatus=document.getElementById('print-status');
- function fit(){m.invalidateSize(true);const bounds=area.getBounds();if(bounds.isValid())m.fitBounds(bounds,{padding:[35,35],maxZoom:16,animate:false});else m.setView([d.start[1],d.start[0]],14);}
- // Force a fixed A4 map size so Leaflet's SVG layers remain visible in print.
- function ready(){fit();requestAnimationFrame(()=>requestAnimationFrame(()=>{printBtn.disabled=false;printBtn.textContent='Print / Save PDF';printStatus.textContent='Map ready: '+d.facilities.length+' facility markers and 10-minute catchment included.';}));}
- tiles.once('load',ready);
- setTimeout(()=>{if(printBtn.disabled)ready()},2200);
- printBtn.addEventListener('click',()=>{fit();setTimeout(()=>window.print(),700)});
- window.addEventListener('beforeprint',()=>{m.invalidateSize(true)});
- window.addEventListener('afterprint',()=>{setTimeout(fit,100)});
- 
- <\/script></body></html>`;
+const shell=document.querySelector('.map-shell');
+const btn=document.createElement('button');btn.id='cool-print-button';btn.type='button';btn.textContent='Print A4 map';shell.appendChild(btn);
+const preview=document.createElement('div');preview.id='cm-print-preview';
+preview.innerHTML=`<div id="cm-print-actions"><span id="cm-print-status">Preview uses your EXISTING map and layers</span><div><button type="button" id="cm-close-print">Back to map</button> <button type="button" id="cm-start-print">Print / Save PDF</button></div></div>
+<div id="cm-print-sheet"><div style="font-size:10px;font-weight:bold;letter-spacing:2px;color:#27776c">COOL MELBOURNE / PRINTABLE WALKING MAP</div><h1>Find cooling resources nearby</h1><p class="cm-sub">Mapped facilities within a modelled 10-minute pedestrian-network catchment</p>
+<div class="cm-info"><strong>Starting point:</strong> <span id="cm-location"></span><br><strong>Currently visible reachable facilities:</strong> <span id="cm-total"></span></div>
+<div id="cm-print-map-holder"></div>
+<div class="cm-legend"><span><i class="cm-dot" style="background:#174f78"></i>Start</span><span><i class="cm-dot" style="background:#246da8"></i>Indoor</span><span><i class="cm-dot" style="background:#2b9c9a"></i>Outdoor</span><span><i class="cm-dot" style="background:#c6e8f8;border-color:#4096cb"></i>10-minute catchment</span></div>
+<div class="cm-note"><b>Before travelling:</b> Opening hours, public access and temporary closures are not verified in real time. Walking times vary by person. This static map will not update after printing.</div>
+<div class="cm-footer"><span>Map © OpenStreetMap contributors · Cool Melbourne</span><span id="cm-date"></span></div></div>`;
+document.body.appendChild(preview);
+const originalMap=document.getElementById('map');
+const originalParent=originalMap.parentNode;
+const originalNext=originalMap.nextSibling;
+let oldCenter=null,oldZoom=null,active=false;
+function refreshMap(){map.invalidateSize({pan:false,animate:false});if(iso&&iso.getBounds().isValid())map.fitBounds(iso.getBounds(),{padding:[30,30],maxZoom:16,animate:false});}
+function restore(){if(!active)return;active=false;preview.classList.remove('active');if(originalNext&&originalNext.parentNode===originalParent)originalParent.insertBefore(originalMap,originalNext);else originalParent.insertBefore(originalMap,originalParent.firstChild);map.invalidateSize({pan:false,animate:false});if(oldCenter)map.setView(oldCenter,oldZoom,{animate:false});}
+btn.addEventListener('click',()=>{
+ if(!start||!iso){alert('Choose a starting location and calculate the 10-minute walking catchment first.');return;}
+ oldCenter=map.getCenter();oldZoom=map.getZoom();active=true;
+ document.getElementById('cm-location').textContent=document.getElementById('address').value.trim()||start[1].toFixed(5)+', '+start[0].toFixed(5);
+ document.getElementById('cm-total').textContent=markers.getLayers().length;
+ document.getElementById('cm-date').textContent='Prepared '+new Date().toLocaleDateString('en-AU');
+ preview.classList.add('active');document.getElementById('cm-print-map-holder').appendChild(originalMap);
+ // Reuse the actual Leaflet instance: isochrone, markers and routes are already on this map.
+ requestAnimationFrame(()=>requestAnimationFrame(refreshMap));
+ setTimeout(refreshMap,350);
+});
+document.getElementById('cm-close-print').addEventListener('click',restore);
+document.getElementById('cm-start-print').addEventListener('click',()=>{refreshMap();setTimeout(()=>window.print(),600)});
+window.addEventListener('beforeprint',()=>{if(active)map.invalidateSize({pan:false,animate:false})});
+window.addEventListener('afterprint',()=>{if(active)setTimeout(refreshMap,100)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&active)restore()});
+})();
+</script>
+</body></html>`;
  printWindow.document.open();printWindow.document.write(html);printWindow.document.close();
 });
 })();
