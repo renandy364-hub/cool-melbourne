@@ -563,7 +563,7 @@ btn.addEventListener('click',function(){
  const filtered=typeof visibleReachable==='function'?visibleReachable().map(x=>x.f):reachable.map(x=>x.f);
  const payload={
   start:start,catchment:iso.toGeoJSON(),facilities:filtered.map(f=>({coordinates:f.geometry.coordinates,group:f.properties?.group||'outdoor'})),
-  route:route?route.toGeoJSON():null,
+  route:route&&typeof route.toGeoJSON==='function'?route.toGeoJSON():null,
   address:document.getElementById('address')?.value?.trim()||'Selected map location',
   generated:new Date().toLocaleDateString('en-AU')
  };
@@ -574,12 +574,12 @@ btn.addEventListener('click',function(){
  <style>
  *{box-sizing:border-box}body{margin:0;background:#e6edf2;color:#17365b;font:14px Arial,sans-serif}
  .toolbar{background:#17365b;color:#fff;padding:13px 20px;display:flex;align-items:center;justify-content:space-between;gap:15px}
- .toolbar button{background:#fff;color:#17365b;border:0;padding:11px 17px;border-radius:5px;font-weight:700;cursor:pointer}
- .page{width:210mm;height:297mm;margin:12mm auto;background:#fff;padding:13mm;display:flex;flex-direction:column;box-shadow:0 4px 25px #0002}
+ .toolbar button{background:#fff;color:#17365b;border:0;padding:11px 17px;border-radius:5px;font-weight:700;cursor:pointer}.toolbar button:disabled{opacity:.5;cursor:wait}
+ .page{width:210mm;height:297mm;margin:12mm auto;background:#fff;padding:13mm;display:flex;flex-direction:column;box-shadow:0 4px 25px #0002;overflow:hidden}
  .eyebrow{font-weight:700;font-size:10px;letter-spacing:2px;color:#27776c}
  h1{font-size:27px;letter-spacing:-.8px;margin:8px 0 4px}h2{font-size:13px;font-weight:500;margin:0 0 12px;color:#526e7d}
  .details{padding:11px 13px;background:#eaf3f8;border-radius:6px;font-size:12px;margin-bottom:11px}
- #print-map{width:100%;flex:1;min-height:0;border:1px solid #cddbe4;background:#eef1ec}
+ #print-map{width:100%;height:176mm;min-height:176mm;flex:none;border:1px solid #cddbe4;background:#eef1ec;position:relative;overflow:hidden}
  .legend{display:flex;flex-wrap:wrap;gap:10px 17px;margin-top:12px;font-size:11px}
  .legend span{display:inline-flex;align-items:center;gap:6px}.swatch{width:13px;height:13px;border-radius:50%;display:inline-block}
  .note{margin-top:11px;padding-top:9px;border-top:1px solid #dce5ea;color:#506878;font-size:10px;line-height:1.5}
@@ -588,9 +588,9 @@ btn.addEventListener('click',function(){
  @page{size:A4 portrait;margin:0}
  @media print{html,body{width:210mm;height:297mm;margin:0!important;background:#fff!important;print-color-adjust:exact;-webkit-print-color-adjust:exact}
  .toolbar{display:none!important}.page{margin:0;box-shadow:none;break-after:avoid}
- .leaflet-control-zoom{display:none!important}}
+ .leaflet-control-zoom{display:none!important}.leaflet-pane,.leaflet-map-pane,.leaflet-overlay-pane,.leaflet-marker-pane,.leaflet-tile-pane{visibility:visible!important}.leaflet-overlay-pane svg{display:block!important;visibility:visible!important}}
  </style></head><body>
- <div class="toolbar"><span>Zoom or pan the map if needed, then print at A4 / Save as PDF.</span><button id="do-print">Print / Save PDF</button></div>
+ <div class="toolbar"><span id="print-status">Preparing the catchment and facility layers…</span><button id="do-print" disabled>Preparing map…</button></div>
  <main class="page"><div class="eyebrow">COOL MELBOURNE / PRINTABLE WALKING MAP</div>
  <h1>Find cooling resources nearby</h1><h2>Facilities within a modelled 10-minute pedestrian-network catchment</h2>
  <div class="details"><strong>Starting point:</strong> <span id="location"></span><br><strong>Reachable mapped facilities:</strong> <span id="total"></span></div>
@@ -611,16 +611,23 @@ btn.addEventListener('click',function(){
  document.getElementById('location').textContent=d.address==='Selected map location'?d.start[1].toFixed(5)+', '+d.start[0].toFixed(5):d.address;
  document.getElementById('total').textContent=d.facilities.length;
  document.getElementById('date').textContent='Prepared '+d.generated;
- const m=L.map('print-map',{zoomControl:false,preferCanvas:false,attributionControl:true});
+ const m=L.map('print-map',{zoomControl:false,preferCanvas:false,attributionControl:true,fadeAnimation:false,zoomAnimation:false});
  const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap contributors'}).addTo(m);
  const area=L.geoJSON(d.catchment,{style:{color:'#4096cb',weight:2,fillColor:'#8bcbed',fillOpacity:.28}}).addTo(m);
  d.facilities.forEach(f=>{const latlng=[f.coordinates[1],f.coordinates[0]];L.circleMarker(latlng,{radius:5,color:'#fff',weight:1.4,fillColor:f.group==='indoor'?'#2862aa':'#268f7e',fillOpacity:1}).addTo(m)});
  L.circleMarker([d.start[1],d.start[0]],{radius:8,color:'#fff',weight:3,fillColor:'#174f78',fillOpacity:1}).addTo(m);
  if(d.route){L.geoJSON(d.route,{style:{color:'#ee854b',weight:4}}).addTo(m)}
- function fit(){m.invalidateSize();m.fitBounds(area.getBounds(),{padding:[25,25],maxZoom:16})}
- setTimeout(fit,350);
- document.getElementById('do-print').addEventListener('click',()=>{m.invalidateSize();setTimeout(()=>window.print(),400)});
- window.addEventListener('beforeprint',()=>m.invalidateSize());
+ const printBtn=document.getElementById('do-print');
+ const printStatus=document.getElementById('print-status');
+ function fit(){m.invalidateSize(true);const bounds=area.getBounds();if(bounds.isValid())m.fitBounds(bounds,{padding:[35,35],maxZoom:16,animate:false});else m.setView([d.start[1],d.start[0]],14);}
+ // Force a fixed A4 map size so Leaflet's SVG layers remain visible in print.
+ function ready(){fit();requestAnimationFrame(()=>requestAnimationFrame(()=>{printBtn.disabled=false;printBtn.textContent='Print / Save PDF';printStatus.textContent='Map ready: '+d.facilities.length+' facility markers and 10-minute catchment included.';}));}
+ tiles.once('load',ready);
+ setTimeout(()=>{if(printBtn.disabled)ready()},2200);
+ printBtn.addEventListener('click',()=>{fit();setTimeout(()=>window.print(),700)});
+ window.addEventListener('beforeprint',()=>{m.invalidateSize(true)});
+ window.addEventListener('afterprint',()=>{setTimeout(fit,100)});
+ 
  <\/script></body></html>`;
  printWindow.document.open();printWindow.document.write(html);printWindow.document.close();
 });
